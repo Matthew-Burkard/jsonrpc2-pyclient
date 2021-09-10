@@ -3,7 +3,7 @@ from typing import Any, Optional
 from jsonrpcobjects.objects import RequestType
 from requests import Session
 
-from jsonrpc2client.rpcclient import RPCClient
+from jsonrpc2pyclient.rpcclient import RPCClient
 
 
 class RPCHTTPClient(RPCClient):
