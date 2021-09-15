@@ -1,25 +1,17 @@
-from typing import Any, Optional
+from typing import Optional, Union
 
-from jsonrpcobjects.objects import RequestType
 from requests import Session
 
 from jsonrpc2pyclient.rpcclient import RPCClient
 
 
 class RPCHTTPClient(RPCClient):
-    def __init__(
-            self, session: Session,
-            url: str,
-            headers: Optional[dict] = None
-    ) -> None:
-        self.session = session
+    def __init__(self, url: str, headers: Optional[dict] = None) -> None:
+        self.session = Session()
+        headers = headers or {}
+        headers['contentType'] = 'application/json'
+        self.session.headers = headers
         self.url = url
-        self.headers = headers or {'contentType': 'application/json'}
 
-    def _send_request(self, request: RequestType) -> Any:
-        resp = self.session.post(
-            url=self.url,
-            data=request.json(by_alias=True),
-            headers=self.headers
-        )
-        return self._parse_json(resp.content)
+    def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
+        return self.session.post(url=self.url, data=request_json).content
