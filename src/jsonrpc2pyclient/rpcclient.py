@@ -66,7 +66,7 @@ class RPCClient(abc.ABC):
                 error = get_exception_by_code(resp.error.code) or ServerError
                 raise error(error_resp.error)
             if resp.get('result'):
-                return ResultResponseObject(**resp)
+                return ResultResponseObject(**resp).result
             raise JSONRPCError(
                 ErrorObjectData(
                     code=-32000,
