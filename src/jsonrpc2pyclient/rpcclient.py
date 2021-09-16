@@ -56,22 +56,22 @@ class RPCClient(abc.ABC):
         data = self._send_and_get_json(request.json())
         # Return result or raise error.
         try:
-            resp = json.loads(data)
-            if resp.get('error'):
-                error_resp = ErrorResponseObject(**resp)
-                if resp['error'].get('data'):
-                    error_resp.error = ErrorObjectData(**resp['error'])
+            json_data = json.loads(data)
+            if json_data.get('error'):
+                resp = ErrorResponseObject(**json_data)
+                if json_data['error'].get('data'):
+                    resp.error = ErrorObjectData(**json_data['error'])
                 else:
-                    error_resp.error = ErrorObject(**resp['error'])
+                    resp.error = ErrorObject(**json_data['error'])
                 error = get_exception_by_code(resp.error.code) or ServerError
-                raise error(error_resp.error)
-            if resp.get('result'):
-                return ResultResponseObject(**resp).result
+                raise error(resp.error)
+            if json_data.get('result'):
+                return ResultResponseObject(**json_data).result
             raise JSONRPCError(
                 ErrorObjectData(
                     code=-32000,
                     message='Invalid response from server.',
-                    data=resp,
+                    data=json_data,
                 )
             )
         except (JSONDecodeError, TypeError, AttributeError) as e:
