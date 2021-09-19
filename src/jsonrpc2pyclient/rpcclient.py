@@ -1,7 +1,6 @@
 import abc
 import json
 import logging
-import sys
 from json import JSONDecodeError
 from random import randint
 from typing import Any, Union, Type, Optional
@@ -65,7 +64,7 @@ class RPCClient(abc.ABC):
                     resp.error = ErrorObject(**json_data['error'])
                 error = get_exception_by_code(resp.error.code) or ServerError
                 raise error(resp.error)
-            if json_data.get('result'):
+            if 'result' in json_data.keys():
                 return ResultResponseObject(**json_data).result
             raise JSONRPCError(
                 ErrorObjectData(
