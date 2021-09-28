@@ -33,7 +33,7 @@ class RPCClient(abc.ABC):
         return {}
 
     def _get_id(self) -> int:
-        new_id = (max(self._ids.values()) or 0) + 1
+        new_id = (max(self._ids.values() or [0])) + 1
         self._ids[new_id] = new_id
         return new_id
 
