@@ -1,3 +1,5 @@
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 # JSON RPC 2.0 Client
 
 A collection of classes for creating JSON RPC 2.0 clients in Python.
