@@ -2,21 +2,17 @@ import abc
 import json
 import logging
 from json import JSONDecodeError
-from typing import Any, Union, Type, Optional
+from typing import Any, Optional, Type, Union
 
-from jsonrpcobjects.errors import (
-    get_exception_by_code,
-    ServerError,
-    JSONRPCError,
-)
+from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.jsontypes import JSONStructured
 from jsonrpcobjects.objects import (
-    ResultResponseObject,
     ErrorObject,
     ErrorObjectData,
     ErrorResponseObject,
     RequestObject,
     RequestObjectParams,
+    ResultResponseObject,
 )
 
 __all__ = ("RPCClient",)
