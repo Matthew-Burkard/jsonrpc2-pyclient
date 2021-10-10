@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/code%20style-black-000000.svg"
    height="20"
    alt="Code style: black">
-  <img src="https://img.shields.io/pypi/v/jsonrpc-pyclient.svg"
+  <img src="https://img.shields.io/pypi/v/jsonrpc2-pyclient.svg"
    height="20"
    alt="PyPI version">
   <a href="https://gitlab.com/mburkard/jsonrpc-pyclient/-/blob/main/CONTRIBUTING.md">
