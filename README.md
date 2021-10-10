@@ -1,8 +1,24 @@
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-# JSON RPC 2.0 Client
-
-A collection of classes for creating JSON RPC 2.0 clients in Python.
+<div style="text-align: center">
+<!-- Title: -->
+  <h1>JSON RPC PyClient</h1>
+<!-- Labels: -->
+  <!-- First row: -->
+  <img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg"
+   height="20"
+   alt="License: AGPL v3">
+  <img src="https://img.shields.io/badge/code%20style-black-000000.svg"
+   height="20"
+   alt="Code style: black">
+  <img src="https://img.shields.io/pypi/v/jsonrpc-pyclient.svg"
+   height="20"
+   alt="PyPI version">
+  <a href="https://gitlab.com/mburkard/jsonrpc-pyclient/-/blob/main/CONTRIBUTING.md">
+    <img src="https://img.shields.io/static/v1.svg?label=Contributions&message=Welcome&color=00b250"
+     height="20"
+     alt="Contributions Welcome">
+  </a>
+  <h3>A collection of classes for creating JSON RPC 2.0 clients in Python</h3>
+</div>
 
 ## Usage
 
