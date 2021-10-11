@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center">
 <!-- Title: -->
   <h1>JSON RPC PyClient</h1>
 <!-- Labels: -->
