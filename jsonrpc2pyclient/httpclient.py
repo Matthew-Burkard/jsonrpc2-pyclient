@@ -1,3 +1,4 @@
+"""This module provides the RPCClient HTTP implementation."""
 from typing import Optional, Union
 
 from requests import Session
@@ -6,6 +7,8 @@ from jsonrpc2pyclient.rpcclient import RPCClient
 
 
 class RPCHTTPClient(RPCClient):
+    """A JSON-RPC HTTP Client."""
+
     def __init__(self, url: str, headers: Optional[dict] = None) -> None:
         self.session = Session()
         headers = headers or {}

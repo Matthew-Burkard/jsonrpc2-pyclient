@@ -20,9 +20,44 @@
   <h3>A collection of classes for creating JSON RPC 2.0 clients in Python</h3>
 </div>
 
+## Install
+
+```shell
+pip install jsonrpc2-pyclient
+```
+
 ## Usage
 
-If a JSON RPC server defines the methods "add", "subtract", and "divide", expecting the following requests:
+### RPC Client Abstract Class
+
+The RPCClient abstract class provides methods to ease the development of
+an RPC Client for any transport. It parses JSON-RPC 2.0 requests and
+responses.
+
+To use, an implementation only needs to override the
+`_send_and_get_json` method. This method is used internally.
+JSONRPCClient will pass it a request as a JSON string and expect a
+response as JSON string.
+
+A simple implementation:
+
+```python
+class RPCHTTPClient(RPCClient):
+
+    def __init__(self, url: str) -> None:
+        self.url = url
+        super(RPCHTTPClient, self).__init__()
+
+    def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
+        return requests.post(url=self.url, data=request_json).content
+```
+
+### Default HTTP Client
+
+This module provides a default HTTP implementation of the RPCClient.
+
+If a JSON RPC server defines the methods "add", "subtract", and
+"divide", expecting the following requests:
 
 ```json
 {
