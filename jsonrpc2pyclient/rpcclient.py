@@ -1,35 +1,30 @@
 """This module provides the RPCClient abstract class."""
 import abc
-import json
-import logging
-from json import JSONDecodeError
 from typing import Any, Optional, Union
 
-from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.jsontypes import JSONStructured
-from jsonrpcobjects.objects import (
-    ErrorObject,
-    ErrorObjectData,
-    ErrorResponseObject,
-    RequestObject,
-    RequestObjectParams,
-    ResultResponseObject,
-)
 
-__all__ = ("RPCClient",)
-log = logging.getLogger(__name__)
+from jsonrpc2pyclient._irpcclient import IRPCClient
+
+__all__ = ("AsyncRPCClient", "RPCClient",)
 
 
-class RPCClient(abc.ABC):
-    """Abstract class with methods for creating a JSON-RPC client."""
+class AsyncRPCClient(abc.ABC, IRPCClient):
+    """Abstract class for creating async JSON-RPC clients."""
 
-    def __init__(self) -> None:
-        self._ids = {}
+    @abc.abstractmethod
+    async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
+        ...
 
-    def _get_id(self) -> int:
-        new_id = (max(self._ids.values() or [0])) + 1
-        self._ids[new_id] = new_id
-        return new_id
+    async def call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
+        """Call a method with the provided params."""
+        request = self._build_request(method, params)
+        data = await self._send_and_get_json(request.json())
+        return self._get_result_from_response(data)
+
+
+class RPCClient(abc.ABC, IRPCClient):
+    """Abstract class for creating a JSON-RPC clients."""
 
     @abc.abstractmethod
     def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
@@ -37,48 +32,5 @@ class RPCClient(abc.ABC):
 
     def call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
         """Call a method with the provided params."""
-        # Build request object.
-        if params is not None:
-            request = RequestObjectParams(
-                id=self._get_id(),
-                method=method,
-                params=params,
-            )
-        else:
-            request = RequestObject(id=self._get_id(), method=method)
-        # Send request JSON and get JSON response.
-        data = self._send_and_get_json(request.json())
-        # Return result or raise error.
-        try:
-            json_data = json.loads(data)
-            if resp_id := json_data.get("id"):
-                try:
-                    self._ids.pop(resp_id)
-                except KeyError:
-                    pass
-            if json_data.get("error"):
-                resp = ErrorResponseObject(**json_data)
-                if json_data["error"].get("data"):
-                    resp.error = ErrorObjectData(**json_data["error"])
-                else:
-                    resp.error = ErrorObject(**json_data["error"])
-                error = get_exception_by_code(resp.error.code) or ServerError
-                raise error(resp.error)
-            if "result" in json_data.keys():
-                return ResultResponseObject(**json_data).result
-            raise JSONRPCError(
-                ErrorObjectData(
-                    code=-32000,
-                    message="Invalid response from server.",
-                    data=json_data,
-                )
-            )
-        except (JSONDecodeError, TypeError, AttributeError) as e:
-            log.exception(f"{type(e).__name__}:")
-            raise JSONRPCError(
-                ErrorObjectData(
-                    code=-32000,
-                    message="Invalid response from server.",
-                    data=data,
-                )
-            )
+        request = self._build_request(method, params)
+        return self._get_result_from_response(self._send_and_get_json(request.json()))

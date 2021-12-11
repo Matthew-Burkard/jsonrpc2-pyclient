@@ -17,7 +17,7 @@
      height="20"
      alt="Contributions Welcome">
   </a>
-  <h3>A collection of classes for creating JSON RPC 2.0 clients in Python</h3>
+  <h3>A library for creating JSON RPC 2.0 clients in Python with async support</h3>
 </div>
 
 ## Install
@@ -31,8 +31,8 @@ pip install jsonrpc2-pyclient
 ### RPC Client Abstract Class
 
 The RPCClient abstract class provides methods to ease the development of
-an RPC Client for any transport. It parses JSON-RPC 2.0 requests and
-responses.
+an RPC Client for any transport method. It parses JSON-RPC 2.0 requests
+and responses.
 
 To use, an implementation only needs to override the
 `_send_and_get_json` method. This method is used internally.
@@ -55,6 +55,8 @@ class RPCHTTPClient(RPCClient):
 ### Default HTTP Client
 
 This module provides a default HTTP implementation of the RPCClient.
+
+#### Example HTTP Client Usage
 
 If a JSON RPC server defines the methods "add", "subtract", and
 "divide", expecting the following requests:
@@ -97,15 +99,20 @@ class MathClient(RPCHTTPClient):
 
 
 client = MathClient('http://localhost:5000/api/v1')
-client.add(2, 3)
-client.subtract(2, 3)
-client.divide(3, 2)
+client.add(2, 3)  # 5
+client.subtract(2, 3)  # -1
+client.divide(2, 2)  # 1
 ```
+
+Notice, just the result field of the JSON-RPC response object is
+returned by `call`, not the whole object.
 
 ## Errors
 
 If the server responds with an error, an RpcError is thrown.
-There is an RpcError for each standard JSON RPC 2.0 error, each of them extends RpcError.
+
+There is an RpcError for each standard JSON RPC 2.0 error, each of them
+extends RpcError.
 
 ```python
 client = MathClient('http://localhost:5000/api/v1')
@@ -119,4 +126,20 @@ try:
     client.divide(0, 0)
 except ServerError as e:
     log.exception(f'{type(e).__name__}:')
+```
+
+### Async Support (v1.1+)
+
+Async alternatives to the RPCClient ABC and RPCHTTPClient are available.
+
+```python
+class AsyncMathClient(AsyncRPCHTTPClient):
+    async def add(self, a: int, b: int) -> int:
+        return await self.call('add', [a, b])
+
+    async def subtract(self, a: int, b: int) -> int:
+        return await self.call('subtract', [a, b])
+
+    async def divide(self, a: int, b: int) -> float:
+        return await self.call('divide', [a, b])
 ```
