@@ -1,8 +1,9 @@
+"""This module provides the RPCClient abstract class."""
 import abc
 import json
 import logging
 from json import JSONDecodeError
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Union
 
 from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.jsontypes import JSONStructured
@@ -20,12 +21,10 @@ log = logging.getLogger(__name__)
 
 
 class RPCClient(abc.ABC):
+    """Abstract class with methods for creating a JSON-RPC client."""
+
     def __init__(self) -> None:
         self._ids = {}
-
-    @property
-    def server_errors(self) -> dict[int, Type]:
-        return {}
 
     def _get_id(self) -> int:
         new_id = (max(self._ids.values() or [0])) + 1
@@ -36,7 +35,8 @@ class RPCClient(abc.ABC):
     def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         ...
 
-    def _call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
+    def call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
+        """Call a method with the provided params."""
         # Build request object.
         if params is not None:
             request = RequestObjectParams(
