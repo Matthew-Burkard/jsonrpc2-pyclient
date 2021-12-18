@@ -6,7 +6,7 @@ AsyncRPCClient.
 import json
 import logging
 from json import JSONDecodeError
-from typing import Union
+from typing import Callable, Union
 
 from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.jsontypes import JSONStructured
@@ -27,7 +27,17 @@ class IRPCClient:
     """Abstract class for creating a JSON-RPC client interfaces."""
 
     def __init__(self) -> None:
+        self._pre_call_hooks: list[Callable] = []
         self._ids = {}
+
+    @property
+    def pre_call_hooks(self) -> list[Callable]:
+        """Functions to be called before each method call."""
+        return self._pre_call_hooks
+
+    @pre_call_hooks.setter
+    def pre_call_hooks(self, pch) -> None:
+        self._pre_call_hooks = pch
 
     def _get_id(self) -> int:
         new_id = (max(self._ids.values() or [0])) + 1

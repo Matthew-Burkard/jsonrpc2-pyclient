@@ -1,12 +1,13 @@
 """This module provides the RPCClient abstract class."""
 import abc
+import inspect
 from typing import Any, Optional, Union
 
 from jsonrpcobjects.jsontypes import JSONStructured
 
 from jsonrpc2pyclient._irpcclient import IRPCClient
 
-__all__ = ("AsyncRPCClient", "RPCClient",)
+__all__ = ("AsyncRPCClient", "RPCClient")
 
 
 class AsyncRPCClient(abc.ABC, IRPCClient):
@@ -18,6 +19,10 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
 
     async def call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
         """Call a method with the provided params."""
+        [
+            await f() if inspect.iscoroutinefunction(f) else f()
+            for f in self.pre_call_hooks
+        ]
         request = self._build_request(method, params)
         data = await self._send_and_get_json(request.json())
         return self._get_result_from_response(data)
@@ -33,4 +38,5 @@ class RPCClient(abc.ABC, IRPCClient):
     def call(self, method: str, params: Optional[JSONStructured] = None) -> Any:
         """Call a method with the provided params."""
         request = self._build_request(method, params)
+        [f() for f in self.pre_call_hooks]
         return self._get_result_from_response(self._send_and_get_json(request.json()))
