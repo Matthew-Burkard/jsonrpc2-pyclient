@@ -24,7 +24,7 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
             for f in self.pre_call_hooks
         ]
         request = self._build_request(method, params)
-        data = await self._send_and_get_json(request.json())
+        data = await self._send_and_get_json(request.json(by_alias=True))
         return self._get_result_from_response(data)
 
 
@@ -39,4 +39,6 @@ class RPCClient(abc.ABC, IRPCClient):
         """Call a method with the provided params."""
         request = self._build_request(method, params)
         [f() for f in self.pre_call_hooks]
-        return self._get_result_from_response(self._send_and_get_json(request.json()))
+        return self._get_result_from_response(
+            self._send_and_get_json(request.json(by_alias=True))
+        )
