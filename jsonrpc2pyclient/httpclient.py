@@ -1,5 +1,4 @@
 """This module provides the RPCClient HTTP implementation."""
-import asyncio
 from typing import Optional, Union
 
 import httpx
@@ -13,34 +12,32 @@ __all__ = ("AsyncRPCHTTPClient", "RPCHTTPClient",)
 class AsyncRPCHTTPClient(AsyncRPCClient):
     """A JSON-RPC HTTP Client."""
 
-    def __init__(self, url: str, headers: Optional[dict] = None) -> None:
-        self._client = httpx.AsyncClient()
+    def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
         headers = headers or {}
         headers["Content-Type"] = "application/json"
-        self._client.headers = headers
+        self._headers = headers
         self.url = url
         super(AsyncRPCHTTPClient, self).__init__()
-
-    def __del__(self) -> None:
-        asyncio.ensure_future(self._client.aclose())
 
     @property
     def headers(self) -> Headers:
         """HTTP headers to be sent with each request."""
-        return self._client.headers
+        return self._headers
 
     @headers.setter
     def headers(self, headers) -> None:
-        self._client.headers = headers
+        self._headers = headers
 
     async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
-        return (await self._client.post(self.url, content=request_json)).content
+        async with httpx.AsyncClient() as client:
+            client.headers = {**client.headers, **self.headers}
+            return (await client.post(self.url, content=request_json)).content
 
 
 class RPCHTTPClient(RPCClient):
     """A JSON-RPC HTTP Client."""
 
-    def __init__(self, url: str, headers: Optional[dict] = None) -> None:
+    def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
         self._client = httpx.Client()
         headers = headers or {}
         headers["Content-Type"] = "application/json"
