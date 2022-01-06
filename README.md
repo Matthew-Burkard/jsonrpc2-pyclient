@@ -26,120 +26,69 @@
 pip install jsonrpc2-pyclient
 ```
 
-## Usage
+### RPCClient Abstract Class
 
-### RPC Client Abstract Class
+JSON-RPC 2.0 is transport agnostic. This library provides an abstract
+class that can be extended to create clients for different transports.
 
-The RPCClient abstract class provides methods to ease the development of
-an RPC Client for any transport method. It parses JSON-RPC 2.0 requests
-and responses.
+### Implementations
 
-To use, an implementation only needs to override the
-`_send_and_get_json` method. This method is used internally.
-JSONRPCClient will pass it a request as a JSON string and expect a
-response as JSON string.
+To make client for a transport, extend the `RPCClient` class and
+implement the `_send_and_get_json` which takes a request as a str and is
+expected to return a JSON-RPC 2.0 response as a str or byte string.
+`RPCClient` has a `call` method that uses this internally.
 
-A simple implementation:
+A default HTTP implementation is provided:
 
 ```python
 class RPCHTTPClient(RPCClient):
+    """A JSON-RPC HTTP Client."""
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
+        self._client = httpx.Client()
+        headers = headers or {}
+        headers["Content-Type"] = "application/json"
+        self._client.headers = headers
         self.url = url
         super(RPCHTTPClient, self).__init__()
 
+    def __del__(self) -> None:
+        self._client.close()
+
+    @property
+    def headers(self) -> Headers:
+        """HTTP headers to be sent with each request."""
+        return self._client.headers
+
+    @headers.setter
+    def headers(self, headers) -> None:
+        self._client.headers = headers
+
     def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
-        return requests.post(url=self.url, data=request_json).content
+        return self._client.post(self.url, content=request_json).content
 ```
 
-### Default HTTP Client
+### Usage
 
-This module provides a default HTTP implementation of the RPCClient.
+The `RPCClient` will handle forming requests and parsing responses.
+To call a JSON-RPC 2.0 method with an implementation of `RPCClient`,
+call the `call` method, passing it the name of the method to call and
+the params.
 
-#### Example HTTP Client Usage
+If the response is JSON-RPC 2.0 result object, only the result will be
+returned, none of the wrapper.
 
-If a JSON RPC server defines the methods "add", "subtract", and
-"divide", expecting the following requests:
-
-```json
-{
-  "id": 1,
-  "method": "add",
-  "params": [2, 3],
-  "jsonrpc": "2.0"
-}
-
-{
-  "id": 2,
-  "method": "subtract",
-  "params": [2, 3],
-  "jsonrpc": "2.0"
-}
-
-{
-  "id": 3,
-  "method": "divide",
-  "params": [3, 2],
-  "jsonrpc": "2.0"
-}
-```
-
-Defining and using the corresponding client would look like this:
+If the response is JSON-RPC 2.0 error response, and exception will be
+thrown for the error.
 
 ```python
-class MathClient(RPCHTTPClient):
-    def add(self, a: int, b: int) -> int:
-        return self.call('add', [a, b])
+from jsonrpc2pyclient.httpclient import RPCHTTPClient
+from jsonrpcobjects.errors import JSONRPCError
 
-    def subtract(self, a: int, b: int) -> int:
-        return self.call('subtract', [a, b])
-
-    def divide(self, a: int, b: int) -> float:
-        return self.call('divide', [a, b])
-
-
-client = MathClient('http://localhost:5000/api/v1')
-client.add(2, 3)  # 5
-client.subtract(2, 3)  # -1
-client.divide(2, 2)  # 1
-```
-
-Notice, just the result field of the JSON-RPC response object is
-returned by `call`, not the whole object.
-
-## Errors
-
-If the server responds with an error, an RpcError is thrown.
-
-There is an RpcError for each standard JSON RPC 2.0 error, each of them
-extends RpcError.
-
-```python
-client = MathClient('http://localhost:5000/api/v1')
-
+client = RPCHTTPClient("http://localhost:5000/api/v1/")
 try:
-    client.add('two', 'three')
-except InvalidParams as e:
-    log.exception(f'{type(e).__name__}:')
-
-try:
-    client.divide(0, 0)
-except ServerError as e:
-    log.exception(f'{type(e).__name__}:')
-```
-
-### Async Support (v1.1+)
-
-Async alternatives to the RPCClient ABC and RPCHTTPClient are available.
-
-```python
-class AsyncMathClient(AsyncRPCHTTPClient):
-    async def add(self, a: int, b: int) -> int:
-        return await self.call('add', [a, b])
-
-    async def subtract(self, a: int, b: int) -> int:
-        return await self.call('subtract', [a, b])
-
-    async def divide(self, a: int, b: int) -> float:
-        return await self.call('divide', [a, b])
+    res = client.call("divide", [0, 0])
+    print(f"JSON-RPC Result: {res}")
+except JSONRPCError as e:
+    print(f"JSON-RPC Error: {e}")
 ```
