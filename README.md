@@ -23,6 +23,10 @@
 ## Install
 
 ```shell
+poetry add jsonrpc2-pyclient
+```
+
+```shell
 pip install jsonrpc2-pyclient
 ```
 
