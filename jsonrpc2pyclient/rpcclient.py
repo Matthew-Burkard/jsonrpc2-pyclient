@@ -15,7 +15,9 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
     async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         ...
 
-    async def call(self, method: str, params: Optional[dict[str, Any]] = None) -> Any:
+    async def call(
+        self, method: str, params: Optional[Union[list, dict[str, Any]]] = None
+    ) -> Any:
         """Call a method with the provided params."""
         [
             await f() if inspect.iscoroutinefunction(f) else f()
@@ -33,7 +35,9 @@ class RPCClient(abc.ABC, IRPCClient):
     def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         ...
 
-    def call(self, method: str, params: Optional[dict[str, Any]] = None) -> Any:
+    def call(
+        self, method: str, params: Optional[Union[list, dict[str, Any]]] = None
+    ) -> Any:
         """Call a method with the provided params."""
         request = self._build_request(method, params)
         [f() for f in self.pre_call_hooks]

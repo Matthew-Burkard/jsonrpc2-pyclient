@@ -6,7 +6,7 @@ AsyncRPCClient.
 import json
 import logging
 from json import JSONDecodeError
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.objects import (
@@ -27,7 +27,7 @@ class IRPCClient:
 
     def __init__(self) -> None:
         self._pre_call_hooks: list[Callable] = []
-        self._ids = {}
+        self._ids: dict[int, int] = {}
 
     @property
     def pre_call_hooks(self) -> list[Callable]:
@@ -39,12 +39,12 @@ class IRPCClient:
         self._pre_call_hooks = pch
 
     def _get_id(self) -> int:
-        new_id = (max(self._ids.values() or [0])) + 1
+        new_id = int((max(self._ids.values() or [0]))) + 1
         self._ids[new_id] = new_id
         return new_id
 
     def _build_request(
-        self, method: str, params: dict[str, Any]
+        self, method: str, params: Optional[Union[list, dict[str, Any]]]
     ) -> Union[RequestObject, RequestObjectParams]:
         if params is not None:
             return RequestObjectParams(

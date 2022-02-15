@@ -16,7 +16,7 @@ class AsyncRPCHTTPClient(AsyncRPCClient):
     """A JSON-RPC HTTP Client."""
 
     def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
-        headers = headers or {}
+        headers = headers or Headers()
         headers["Content-Type"] = "application/json"
         self._headers = headers
         self.url = url
@@ -33,7 +33,7 @@ class AsyncRPCHTTPClient(AsyncRPCClient):
 
     async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         async with httpx.AsyncClient() as client:
-            client.headers = {**client.headers, **self.headers}
+            client.headers = Headers({**client.headers, **self.headers})
             return (await client.post(self.url, content=request_json)).content
 
 
@@ -42,7 +42,7 @@ class RPCHTTPClient(RPCClient):
 
     def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
         self._client = httpx.Client()
-        headers = headers or {}
+        headers = headers or Headers()
         headers["Content-Type"] = "application/json"
         self._client.headers = headers
         self.url = url
