@@ -6,10 +6,9 @@ AsyncRPCClient.
 import json
 import logging
 from json import JSONDecodeError
-from typing import Callable, Union
+from typing import Any, Callable, Union
 
 from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
-from jsonrpcobjects.jsontypes import JSONStructured
 from jsonrpcobjects.objects import (
     ErrorObject,
     ErrorObjectData,
@@ -45,7 +44,7 @@ class IRPCClient:
         return new_id
 
     def _build_request(
-        self, method: str, params: JSONStructured
+        self, method: str, params: dict[str, Any]
     ) -> Union[RequestObject, RequestObjectParams]:
         if params is not None:
             return RequestObjectParams(

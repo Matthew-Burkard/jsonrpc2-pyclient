@@ -6,7 +6,10 @@ from httpx import Headers
 
 from jsonrpc2pyclient.rpcclient import AsyncRPCClient, RPCClient
 
-__all__ = ("AsyncRPCHTTPClient", "RPCHTTPClient",)
+__all__ = (
+    "AsyncRPCHTTPClient",
+    "RPCHTTPClient",
+)
 
 
 class AsyncRPCHTTPClient(AsyncRPCClient):
