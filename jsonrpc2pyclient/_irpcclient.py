@@ -57,11 +57,8 @@ class IRPCClient:
     def _get_result_from_response(self, data: Union[bytes, str]):
         try:
             json_data = json.loads(data)
-            if resp_id := json_data.get("id"):
-                try:
-                    self._ids.pop(resp_id)
-                except KeyError:
-                    pass
+            if (resp_id := json_data.get("id")) and resp_id in self._ids:
+                self._ids.pop(resp_id)
             if json_data.get("error"):
                 resp = ErrorResponseObject(**json_data)
                 if json_data["error"].get("data"):
