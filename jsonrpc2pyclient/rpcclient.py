@@ -19,10 +19,8 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
         self, method: str, params: Optional[Union[list, dict[str, Any]]] = None
     ) -> Any:
         """Call a method with the provided params."""
-        [
-            await f() if inspect.iscoroutinefunction(f) else f()
-            for f in self.pre_call_hooks
-        ]
+        for hook in self.pre_call_hooks:
+            await hook() if inspect.iscoroutinefunction(hook) else hook()
         request = self._build_request(method, params)
         data = await self._send_and_get_json(request.json(by_alias=True))
         return self._get_result_from_response(data)
@@ -40,7 +38,8 @@ class RPCClient(abc.ABC, IRPCClient):
     ) -> Any:
         """Call a method with the provided params."""
         request = self._build_request(method, params)
-        [f() for f in self.pre_call_hooks]
+        for hook in self.pre_call_hooks:
+            hook()
         return self._get_result_from_response(
             self._send_and_get_json(request.json(by_alias=True))
         )
