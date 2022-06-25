@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jsonrpc2-pyclient"
-version = "2.2.10"
+version = "2.2.11"
 description = "Python JSON-RPC 2.0 client library."
 readme = "README.md"
 repository = "https://gitlab.com/mburkard/jsonrpc2-pyclient"
@@ -19,7 +19,7 @@ httpx = "^0.23.0"
 
 [tool.poetry.dev-dependencies]
 safety = "^1.10.3"
-mypy = "^0.960"
+mypy = "^0.961"
 coverage = "^6.4.1"
 
 [build-system]
