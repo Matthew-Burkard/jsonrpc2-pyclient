@@ -25,11 +25,11 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "charset-normalizer"
-version = "3.0.1"
+version = "3.1.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7.0"
 
 [[package]]
 name = "click"
@@ -144,14 +144,14 @@ pydantic = ">=1.9.2,<2.0.0"
 
 [[package]]
 name = "mypy"
-version = "1.0.1"
+version = "1.1.1"
 description = "Optional static typing for Python"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
-mypy-extensions = ">=0.4.3"
+mypy-extensions = ">=1.0.0"
 tomli = {version = ">=1.1.0", markers = "python_version < \"3.11\""}
 typing-extensions = ">=3.10"
 
