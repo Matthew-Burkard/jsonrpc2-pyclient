@@ -1,8 +1,10 @@
-"""This module provides the IRPCClient abstract class.
+"""IRPCClient abstract class.
 
 This provides functionality that will be shared by the RPCClient and
 AsyncRPCClient.
 """
+__all__ = ("IRPCClient",)
+
 import json
 import logging
 from json import JSONDecodeError
@@ -10,15 +12,14 @@ from typing import Any, Callable, Optional, Union
 
 from jsonrpcobjects.errors import get_exception_by_code, JSONRPCError, ServerError
 from jsonrpcobjects.objects import (
-    ErrorObject,
-    ErrorObjectData,
-    ErrorResponseObject,
-    RequestObject,
-    RequestObjectParams,
-    ResultResponseObject,
+    DataError,
+    Error,
+    ErrorResponse,
+    ParamsRequest,
+    Request,
+    ResultResponse,
 )
 
-__all__ = ("IRPCClient",)
 log = logging.getLogger(__name__)
 
 
@@ -45,14 +46,14 @@ class IRPCClient:
 
     def _build_request(
         self, method: str, params: Optional[Union[list, dict[str, Any]]]
-    ) -> Union[RequestObject, RequestObjectParams]:
+    ) -> Union[Request, ParamsRequest]:
         if params is not None:
-            return RequestObjectParams(
+            return ParamsRequest(
                 id=self._get_id(),
                 method=method,
                 params=params,
             )
-        return RequestObject(id=self._get_id(), method=method)
+        return Request(id=self._get_id(), method=method)
 
     def _get_result_from_response(self, data: Union[bytes, str]):
         try:
@@ -60,17 +61,17 @@ class IRPCClient:
             if (resp_id := json_data.get("id")) and resp_id in self._ids:
                 self._ids.pop(resp_id)
             if json_data.get("error"):
-                resp = ErrorResponseObject(**json_data)
+                resp = ErrorResponse(**json_data)
                 if json_data["error"].get("data"):
-                    resp.error = ErrorObjectData(**json_data["error"])
+                    resp.error = DataError(**json_data["error"])
                 else:
-                    resp.error = ErrorObject(**json_data["error"])
+                    resp.error = Error(**json_data["error"])
                 error = get_exception_by_code(resp.error.code) or ServerError
                 raise error(resp.error)
             if "result" in json_data.keys():
-                return ResultResponseObject(**json_data).result
+                return ResultResponse(**json_data).result
             raise JSONRPCError(
-                ErrorObjectData(
+                DataError(
                     code=-32000,
                     message="Invalid response from server.",
                     data=json_data,
@@ -79,7 +80,7 @@ class IRPCClient:
         except (JSONDecodeError, TypeError, AttributeError) as e:
             log.exception(f"{type(e).__name__}:")
             raise JSONRPCError(
-                ErrorObjectData(
+                DataError(
                     code=-32000,
                     message="Invalid response from server.",
                     data=data,

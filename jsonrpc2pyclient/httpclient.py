@@ -1,15 +1,12 @@
-"""This module provides the RPCClient HTTP implementation."""
+"""RPCClient HTTP implementation."""
+__all__ = ("AsyncRPCHTTPClient", "RPCHTTPClient")
+
 from typing import Optional, Union
 
 import httpx
 from httpx import Headers
 
 from jsonrpc2pyclient.rpcclient import AsyncRPCClient, RPCClient
-
-__all__ = (
-    "AsyncRPCHTTPClient",
-    "RPCHTTPClient",
-)
 
 
 class AsyncRPCHTTPClient(AsyncRPCClient):
