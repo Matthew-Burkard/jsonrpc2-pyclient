@@ -30,47 +30,57 @@ poetry add jsonrpc2-pyclient
 pip install jsonrpc2-pyclient
 ```
 
+## Example
+
+Example of the client decorator implementing rpc methods from reading
+method signatures.
+
+```python
+import asyncio
+
+from pydantic import BaseModel
+
+from jsonrpc2pyclient.decorator import rpc_client
+from jsonrpc2pyclient.httpclient import AsyncRPCHTTPClient
+
+transport = AsyncRPCHTTPClient("http://127.0.0.1:8000/api/v1")
+
+
+class Vector3(BaseModel):
+    x: float = 1.0
+    y: float = 1.0
+    z: float = 1.0
+
+
+@rpc_client(transport=transport)
+class TestClient:
+    async def add(self, a: int, b: int) -> int: ...
+    async def get_distance(self, a: Vector3, b: Vector3) -> Vector3: ...
+
+
+async def main() -> None:
+    client = TestClient()
+    assert await client.add(3, 4) == 7
+    assert await client.get_distance(Vector3(), Vector3()) == Vector3(x=0, y=0, z=0)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ### RPCClient Abstract Class
 
 JSON-RPC 2.0 is transport agnostic. This library provides an abstract
 class that can be extended to create clients for different transports.
 
-### Implementations
+### Transports
 
 To make client for a transport, extend the `RPCClient` class and
 implement the `_send_and_get_json` which takes a request as a str and is
 expected to return a JSON-RPC 2.0 response as a str or byte string.
 `RPCClient` has a `call` method that uses this internally.
 
-A default HTTP implementation is provided:
-
-```python
-class RPCHTTPClient(RPCClient):
-    """A JSON-RPC HTTP Client."""
-
-    def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
-        self._client = httpx.Client()
-        headers = headers or {}
-        headers["Content-Type"] = "application/json"
-        self._client.headers = headers
-        self.url = url
-        super(RPCHTTPClient, self).__init__()
-
-    def __del__(self) -> None:
-        self._client.close()
-
-    @property
-    def headers(self) -> Headers:
-        """HTTP headers to be sent with each request."""
-        return self._client.headers
-
-    @headers.setter
-    def headers(self, headers) -> None:
-        self._client.headers = headers
-
-    def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
-        return self._client.post(self.url, content=request_json).content
-```
+A default HTTP and Websocket implementation is provided.
 
 ### Usage
 
@@ -95,4 +105,23 @@ try:
     print(f"JSON-RPC Result: {res}")
 except JSONRPCError as e:
     print(f"JSON-RPC Error: {e}")
+```
+
+## Client Decorator
+
+The `rpc_client` decorator can be used to quickly put together a client
+with typed methods. When a class is decorated, each method defined in
+that class will make RPC requests using the provided transport and parse
+the result. The name of the method will be used in the RPC request.
+
+```python
+transport = RPCHTTPClient("http://127.0.0.1:8000/api/v1")
+
+@rpc_client(transport=transport)
+class TestClient:
+    def add(self, a: int, b: int) -> int: ...
+
+
+client = TestClient()
+assert client.add(3, 4) == 7
 ```

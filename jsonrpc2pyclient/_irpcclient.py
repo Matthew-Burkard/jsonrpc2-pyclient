@@ -45,7 +45,7 @@ class IRPCClient:
         return new_id
 
     def _build_request(
-        self, method: str, params: Optional[Union[list, dict[str, Any]]]
+        self, method: str, params: Optional[Union[list[Any], dict[str, Any]]]
     ) -> Union[Request, ParamsRequest]:
         if params is not None:
             return ParamsRequest(

@@ -16,7 +16,7 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
         ...
 
     async def call(
-        self, method: str, params: Optional[Union[list, dict[str, Any]]] = None
+        self, method: str, params: Optional[Union[list[Any], dict[str, Any]]] = None
     ) -> Any:
         """Call a method with the provided params."""
         for hook in self.pre_call_hooks:
@@ -34,7 +34,7 @@ class RPCClient(abc.ABC, IRPCClient):
         ...
 
     def call(
-        self, method: str, params: Optional[Union[list, dict[str, Any]]] = None
+        self, method: str, params: Optional[Union[list[Any], dict[str, Any]]] = None
     ) -> Any:
         """Call a method with the provided params."""
         request = self._build_request(method, params)
