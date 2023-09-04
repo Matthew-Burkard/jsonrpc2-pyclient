@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "jsonrpc2-pyclient"
-version = "3.0.0"
+version = "3.0.1"
 description = "Python JSON-RPC 2.0 client library."
 readme = "README.md"
 repository = "https://gitlab.com/mburkard/jsonrpc2-pyclient"
@@ -16,13 +16,52 @@ packages = [
 python = "^3.9"
 jsonrpc2-objects = "^3.0.0"
 httpx = "^0.24.1"
+websockets = "^11.0.3"
 
 [tool.poetry.dev-dependencies]
 safety = "^2.1.1"
-mypy = "^1.0.1"
+mypy = "^1.5.1"
 coverage = "^7.2.2"
 pytest = "^7.4.0"
+ruff = "^0.0.287"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.ruff]
+select = [
+    "ARG",
+    "ASYNC",
+    "B",
+    "C4",
+    "D",
+    "E",
+    "EM",
+    "ERA",
+    "F",
+    "FBT",
+    "FA",
+    "FLY",
+    "FIX",
+    "ICN",
+    "INT",
+    "ISC",
+    "N",
+    "PL",
+    "PTH",
+    "PYI",
+    "Q",
+    "RET",
+    "S",
+    "SIM",
+    "T10",
+    "TD",
+    "TRY",
+]
+
+ignore = ["D203", "D213", "FA102", "FA100"]

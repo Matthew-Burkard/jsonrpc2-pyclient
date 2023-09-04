@@ -13,6 +13,7 @@ class AsyncRPCHTTPClient(AsyncRPCClient):
     """A JSON-RPC HTTP Client."""
 
     def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
+        """Init async HTTP client with URL and headers."""
         headers = headers or Headers()
         headers["Content-Type"] = "application/json"
         self._headers = headers
@@ -25,8 +26,8 @@ class AsyncRPCHTTPClient(AsyncRPCClient):
         return self._headers
 
     @headers.setter
-    def headers(self, headers) -> None:
-        self._headers = headers
+    def headers(self, headers: Union[Headers | dict[str, str]]) -> None:
+        self._headers = Headers(headers)
 
     async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         async with httpx.AsyncClient() as client:
@@ -38,6 +39,7 @@ class RPCHTTPClient(RPCClient):
     """A JSON-RPC HTTP Client."""
 
     def __init__(self, url: str, headers: Optional[Headers] = None) -> None:
+        """Init HTTP client with URL and headers."""
         self._client = httpx.Client()
         headers = headers or Headers()
         headers["Content-Type"] = "application/json"
@@ -45,17 +47,14 @@ class RPCHTTPClient(RPCClient):
         self.url = url
         super(RPCHTTPClient, self).__init__()
 
-    def __del__(self) -> None:
-        self._client.close()
-
     @property
     def headers(self) -> Headers:
         """HTTP headers to be sent with each request."""
         return self._client.headers
 
     @headers.setter
-    def headers(self, headers) -> None:
-        self._client.headers = headers
+    def headers(self, headers: Union[Headers | dict[str, str]]) -> None:
+        self._client.headers = Headers(headers)
 
     def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
         return self._client.post(self.url, content=request_json).content

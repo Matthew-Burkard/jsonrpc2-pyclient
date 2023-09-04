@@ -1,4 +1,4 @@
-"""This module provides the RPCClient abstract class."""
+"""RPCClient abstract classes for sync and async RPC clients."""
 import abc
 import inspect
 from typing import Any, Optional, Union

@@ -36,8 +36,8 @@ class IRPCClient:
         return self._pre_call_hooks
 
     @pre_call_hooks.setter
-    def pre_call_hooks(self, pch) -> None:
-        self._pre_call_hooks = pch
+    def pre_call_hooks(self, pre_call_hooks: list[Callable]) -> None:
+        self._pre_call_hooks = pre_call_hooks
 
     def _get_id(self) -> int:
         new_id = int((max(self._ids.values() or [0]))) + 1
@@ -55,7 +55,7 @@ class IRPCClient:
             )
         return Request(id=self._get_id(), method=method)
 
-    def _get_result_from_response(self, data: Union[bytes, str]):
+    def _get_result_from_response(self, data: Union[bytes, str]) -> Any:
         try:
             json_data = json.loads(data)
             if (resp_id := json_data.get("id")) and resp_id in self._ids:
@@ -68,7 +68,7 @@ class IRPCClient:
                     resp.error = Error(**json_data["error"])
                 error = get_exception_by_code(resp.error.code) or ServerError
                 raise error(resp.error)
-            if "result" in json_data.keys():
+            if "result" in json_data:
                 return ResultResponse(**json_data).result
             raise JSONRPCError(
                 DataError(
@@ -85,4 +85,4 @@ class IRPCClient:
                     message="Invalid response from server.",
                     data=data,
                 )
-            )
+            ) from e

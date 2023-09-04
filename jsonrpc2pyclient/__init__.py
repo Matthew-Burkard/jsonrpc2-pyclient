@@ -1,3 +1,1 @@
-"""
-This module houses the RPCClient abc and an HTTP implementation of it.
-"""
+"""Module for RPCClient abc and an HTTP/WS implementation of it."""
