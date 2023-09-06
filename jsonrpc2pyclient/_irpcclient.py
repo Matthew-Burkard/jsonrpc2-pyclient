@@ -55,11 +55,19 @@ class IRPCClient:
             )
         return Request(id=self._get_id(), method=method)
 
-    def _get_result_from_response(self, data: Union[bytes, str]) -> Any:
+    def _get_result_from_response(self, data: Union[bytes, str, dict[str, Any]]) -> Any:
         try:
-            json_data = json.loads(data)
+            # Parse string to JSON.
+            if not isinstance(data, dict):
+                json_data = json.loads(data)
+            else:
+                json_data = data
+
+            # Free ID of this response if `id` field is present.
             if (resp_id := json_data.get("id")) and resp_id in self._ids:
                 self._ids.pop(resp_id)
+
+            # Raise error if JSON RPC error response.
             if json_data.get("error"):
                 resp = ErrorResponse(**json_data)
                 if json_data["error"].get("data"):
@@ -68,8 +76,12 @@ class IRPCClient:
                     resp.error = Error(**json_data["error"])
                 error = get_exception_by_code(resp.error.code) or ServerError
                 raise error(resp.error)
+
+            # Return result if JSON RPC result response.
             if "result" in json_data:
                 return ResultResponse(**json_data).result
+
+            # Not valid JSON RPC response if it has no error or result.
             raise JSONRPCError(
                 DataError(
                     code=-32000,

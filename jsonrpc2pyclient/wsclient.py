@@ -3,7 +3,7 @@ __all__ = ("AsyncRPCWSClient",)
 
 import asyncio
 import json
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import websockets
 from websockets.legacy.client import WebSocketClientProtocol
@@ -23,36 +23,37 @@ class AsyncRPCWSClient(AsyncRPCClient):
         self._responses: dict[str | int, str] = {}
         super(AsyncRPCWSClient, self).__init__()
 
-    async def connect(self):
+    async def connect(self) -> None:
         """Connect to WebSocket server."""
         self.websocket = await websockets.connect(self.url, extra_headers=self.headers)
         asyncio.create_task(self._receive_messages())
 
-    async def _receive_messages(self):
+    async def _receive_messages(self) -> None:
         while True:
             try:
                 message = await self.websocket.recv()
                 response = json.loads(message)
                 request_id = response.get("id")
-                self._responses[request_id] = message
+                self._responses[request_id] = response
                 resolver = self._message_resolvers.pop(request_id)
                 resolver.set()
             except websockets.ConnectionClosedOK:
                 break
 
-    async def _send_and_get_json(self, request_json: str) -> Union[bytes, str]:
+    async def _send_and_get_json(
+        self, request_json: str, request_id: Optional[int] = None
+    ) -> Union[bytes, str, dict[str, Any]]:
         if self.websocket and self.websocket.open:
             await self.websocket.send(request_json)
         else:
             msg = "WebSocket is not open, call `connect()` first."
             raise Exception(msg)
         event = asyncio.Event()
-        request_id = json.loads(request_json)["id"]
         self._message_resolvers[request_id] = event
         await event.wait()
         return self._responses.pop(request_id)
 
-    async def close(self):
+    async def close(self) -> None:
         """Close connection to WebSocket server."""
         if self.websocket and self.websocket.open:
             await self.websocket.close()
