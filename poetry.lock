@@ -61,7 +61,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "coverage"
-version = "7.3.0"
+version = "7.3.1"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -277,6 +277,21 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-asyncio"
+version = "0.21.1"
+description = "Pytest support for asyncio"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pytest = ">=7.0.0"
+
+[package.extras]
+docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1.0)"]
+testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)", "flaky (>=3.5.0)", "mypy (>=0.931)", "pytest-trio (>=0.7.0)"]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
@@ -393,7 +408,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "23cf8478a74b09892b9cab7e82a2afefa5921649989b398e0d3a8fb93caa2857"
+content-hash = "0482be9894e52d733fda7ec58dbb0e511b7f4882070ea76ce667d29081875141"
 
 [metadata.files]
 annotated-types = []
@@ -419,6 +434,7 @@ pydantic = []
 pydantic-core = []
 pyparsing = []
 pytest = []
+pytest-asyncio = []
 requests = []
 "ruamel.yaml" = []
 "ruamel.yaml.clib" = []
