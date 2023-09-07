@@ -114,6 +114,8 @@ with typed methods. When a class is decorated, each method defined in
 that class will make RPC requests using the provided transport and parse
 the result. The name of the method will be used in the RPC request.
 
+The method body must end with `...` for the decorator to implement it.
+
 ```python
 transport = RPCHTTPClient("http://127.0.0.1:8000/api/v1")
 

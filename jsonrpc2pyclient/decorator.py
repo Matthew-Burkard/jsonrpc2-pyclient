@@ -1,6 +1,7 @@
 """BaseClient for quickly creating typed RPC clients."""
 import functools
 import inspect
+import re
 from typing import Any, Callable, ForwardRef, Optional, TypeVar, Union
 
 from pydantic import create_model
@@ -22,9 +23,13 @@ def rpc_client(
     def _wrapper(cls: BaseClient) -> BaseClient:
         for attr in dir(cls):
             if callable(getattr(cls, attr)) and not attr.startswith("__"):
-                setattr(
-                    cls, attr, rpc_method(transport, method_prefix)(getattr(cls, attr))
-                )
+                source = inspect.getsource(getattr(cls, attr))
+                if re.match(r"^ *(async )?def.*?\.\.\.\n$", source, re.S):
+                    setattr(
+                        cls,
+                        attr,
+                        rpc_method(transport, method_prefix)(getattr(cls, attr)),
+                    )
         return cls
 
     return _wrapper
