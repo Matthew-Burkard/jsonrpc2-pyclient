@@ -1,4 +1,6 @@
 """BaseClient for quickly creating typed RPC clients."""
+__all__ = ("rpc_client", "rpc_method")
+
 import functools
 import inspect
 import re
@@ -16,19 +18,32 @@ ClientType = Union[AsyncRPCClient, RPCClient]
 
 
 def rpc_client(
-    transport: ClientType, method_prefix: Optional[str] = None
+    transport: ClientType,
+    method_prefix: Optional[str] = None,
+    method_name_overrides: Optional[dict[str, str]] = None,
 ) -> Callable[[BaseClient], BaseClient]:
-    """Add RPC implementations for the decorated classes methods."""
+    """Add RPC implementations for the decorated classes methods.
+
+    :param transport: RPC transport client.
+    :param method_prefix: Prefix to add to each method name.
+    :param method_name_overrides: Map of function name to method name to
+        call instead of the `function.__name__`.
+    :return: Class wrapper.
+    """
+    method_name_overrides = method_name_overrides or {}
 
     def _wrapper(cls: BaseClient) -> BaseClient:
         for attr in dir(cls):
             if callable(getattr(cls, attr)) and not attr.startswith("__"):
                 source = inspect.getsource(getattr(cls, attr))
                 if re.match(r"^ *(async )?def.*?\.\.\.\n$", source, re.S):
+                    name = method_name_overrides.get(attr) or attr
                     setattr(
                         cls,
                         attr,
-                        rpc_method(transport, method_prefix)(getattr(cls, attr)),
+                        rpc_method(transport, f"{method_prefix}{name}")(
+                            getattr(cls, attr)
+                        ),
                     )
         return cls
 
@@ -36,15 +51,23 @@ def rpc_client(
 
 
 def rpc_method(
-    transport: ClientType, prefix: Optional[str], *, by_position: bool = True
+    transport: ClientType,
+    method_name: Optional[str] = None,
+    *,
+    by_position: bool = True,
 ) -> Callable:
-    """Use types of decorated method to call RPC method on call."""
+    """Use types of decorated method to call RPC method on call.
+
+    :param transport: RPC transport client.
+    :param method_name:
+    :param by_position:
+    :return:
+    """
 
     def _decorator(function: Callable) -> Callable:
-        name = (prefix or "") + function.__name__
         signature = inspect.signature(function)
         param_model = create_model(  # type: ignore
-            f"{name}Params",
+            f"{function.__name__}Params",
             **{
                 k: (
                     resolved_annotation(v.annotation, function),
@@ -55,7 +78,7 @@ def rpc_method(
             },
         )
         result_model = create_model(
-            f"{name}Result",
+            f"{function.__name__}Result",
             result=(resolved_annotation(signature.return_annotation, function), ...),
         )
 
@@ -67,6 +90,7 @@ def rpc_method(
                 if i < len(args) - 1:
                     params_dict[field_name] = args[i + 1]
             params = list(params_dict.values()) if by_position else params_dict
+            name = method_name if method_name is not None else function.__name__
             # Type ignore because mypy is wrong.
             resp = await transport.call(name, params)  # type: ignore
             # Cast to proper return type.
