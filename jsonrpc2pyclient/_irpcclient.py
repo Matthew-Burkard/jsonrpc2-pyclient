@@ -58,10 +58,7 @@ class IRPCClient:
     def _get_result_from_response(self, data: Union[bytes, str, dict[str, Any]]) -> Any:
         try:
             # Parse string to JSON.
-            if not isinstance(data, dict):
-                json_data = json.loads(data)
-            else:
-                json_data = data
+            json_data = json.loads(data) if not isinstance(data, dict) else data
 
             # Free ID of this response if `id` field is present.
             if (resp_id := json_data.get("id")) and resp_id in self._ids:

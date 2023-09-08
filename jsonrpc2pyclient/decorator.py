@@ -14,6 +14,7 @@ from pydantic.v1.typing import evaluate_forwardref
 from jsonrpc2pyclient.rpcclient import AsyncRPCClient, RPCClient
 
 BaseClient = TypeVar("BaseClient")
+FunctionType = TypeVar("FunctionType", bound=Union[Callable])
 ClientType = Union[AsyncRPCClient, RPCClient]
 
 
@@ -55,7 +56,7 @@ def rpc_method(
     method_name: Optional[str] = None,
     *,
     by_position: bool = True,
-) -> Callable:
+) -> Callable[[FunctionType], FunctionType]:
     """Use types of decorated method to call RPC method on call.
 
     :param transport: RPC transport client.
@@ -64,7 +65,7 @@ def rpc_method(
     :return:
     """
 
-    def _decorator(function: Callable) -> Callable:
+    def _decorator(function: FunctionType) -> FunctionType:
         signature = inspect.signature(function)
         param_model = create_model(  # type: ignore
             f"{function.__name__}Params",
@@ -97,7 +98,7 @@ def rpc_method(
             # Type ignore because mypy can't understand `create_model`.
             return result_model(result=resp).result  # type: ignore
 
-        return _wrapper
+        return _wrapper  # type: ignore
 
     return _decorator
 

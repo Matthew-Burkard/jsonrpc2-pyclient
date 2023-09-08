@@ -52,7 +52,7 @@ class AsyncRPCWSClient(AsyncRPCClient):
 
     async def _receive_messages(self) -> None:
         if self.websocket is None or not self.websocket.open:
-            return None
+            return
         while True:
             try:
                 message = await self.websocket.recv()
@@ -71,7 +71,7 @@ class AsyncRPCWSClient(AsyncRPCClient):
             await self.websocket.send(request_json)
         else:
             msg = "WebSocket is not open, call `connect()` first."
-            raise Exception(msg)
+            raise RuntimeError(msg)
         event = asyncio.Event()
         self._message_resolvers[request_id] = event
         await event.wait()

@@ -30,7 +30,10 @@ class AsyncRPCHTTPClient(AsyncRPCClient):
         self._headers = Headers(headers)
 
     async def _send_and_get_json(
-        self, request_json: str, request_id: int
+        self,
+        request_json: str,
+        # `noqa` since ARG002 wrongfully applies to abc methods.
+        request_id: int,  # noqa: ARG002
     ) -> Union[bytes, str]:
         async with httpx.AsyncClient() as client:
             client.headers = Headers({**client.headers, **self.headers})
@@ -59,6 +62,9 @@ class RPCHTTPClient(RPCClient):
         self._client.headers = Headers(headers)
 
     def _send_and_get_json(
-        self, request_json: str, request_id: int
+        self,
+        request_json: str,
+        # `noqa` since ARG002 wrongfully applies to abc methods.
+        request_id: int,  # noqa: ARG002
     ) -> Union[bytes, str]:
         return self._client.post(self.url, content=request_json).content
