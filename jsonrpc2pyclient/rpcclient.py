@@ -13,7 +13,7 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
 
     @abc.abstractmethod
     async def _send_and_get_json(
-        self, request_json: str, request_id: Optional[int] = None
+        self, request_json: str, request_id: int
     ) -> Union[bytes, str, dict[str, Any]]:
         ...
 
@@ -24,8 +24,10 @@ class AsyncRPCClient(abc.ABC, IRPCClient):
         for hook in self.pre_call_hooks:
             await hook() if inspect.iscoroutinefunction(hook) else hook()
         request = self._build_request(method, params)
+        # Type ignore because id will always be `int` because this
+        # client creates the id.
         data = await self._send_and_get_json(
-            request.model_dump_json(by_alias=True), request.id
+            request.model_dump_json(by_alias=True), request.id  # type: ignore
         )
         return self._get_result_from_response(data)
 
@@ -35,7 +37,7 @@ class RPCClient(abc.ABC, IRPCClient):
 
     @abc.abstractmethod
     def _send_and_get_json(
-        self, request_json: str, request_id: Optional[int] = None
+        self, request_json: str, request_id: int
     ) -> Union[bytes, str, dict[str, Any]]:
         ...
 
@@ -46,6 +48,10 @@ class RPCClient(abc.ABC, IRPCClient):
         request = self._build_request(method, params)
         for hook in self.pre_call_hooks:
             hook()
+        # Type ignore because id will always be `int` because this
+        # client creates the id.
         return self._get_result_from_response(
-            self._send_and_get_json(request.model_dump_json(by_alias=True))
+            self._send_and_get_json(
+                request.model_dump_json(by_alias=True), request.id  # type: ignore
+            )
         )

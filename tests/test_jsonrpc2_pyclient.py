@@ -23,11 +23,11 @@ class AsyncMathClient(AsyncRPCHTTPClient):
 
     async def add(self, a: float, b: float) -> float:
         """Basic test function."""
-        return await self.call("add", [a, b])
+        return await self.call("math.add", [a, b])
 
     async def get_distance(self, target: Vector3, other: Vector3) -> Vector3:
         """Test function with models."""
-        return Vector3(**await self.call("get_distance", [target, other]))
+        return Vector3(**await self.call("math.get_distance", [target, other]))
 
 
 class MathClient(RPCHTTPClient):
@@ -35,16 +35,16 @@ class MathClient(RPCHTTPClient):
 
     def add(self, a: float, b: float) -> float:
         """Basic test function."""
-        return self.call("add", [a, b])
+        return self.call("math.add", [a, b])
 
     def get_distance(self, target: Vector3, other: Vector3) -> Vector3:
         """Test function with models."""
-        return Vector3(**self.call("get_distance", [target, other]))
+        return Vector3(**self.call("math.get_distance", [target, other]))
 
 
 class AsyncRPCClientTest(unittest.TestCase):
     def __init__(self, *args) -> None:
-        self.client = AsyncMathClient("http://localhost:9080/api/v1/")
+        self.client = AsyncMathClient("http://localhost:8000/api/v1")
         super(AsyncRPCClientTest, self).__init__(*args)
 
     def test_basic_func(self) -> None:
@@ -59,7 +59,7 @@ class AsyncRPCClientTest(unittest.TestCase):
 
 class RPCClientTest(unittest.TestCase):
     def __init__(self, *args) -> None:
-        self.client = MathClient("http://localhost:9080/api/v1/")
+        self.client = MathClient("http://localhost:8000/api/v1")
         super(RPCClientTest, self).__init__(*args)
 
     def test_basic_func(self) -> None:
