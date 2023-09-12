@@ -107,11 +107,11 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "httpcore"
-version = "0.17.3"
+version = "0.18.0"
 description = "A minimal low-level HTTP client."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
 anyio = ">=3.0,<5.0"
@@ -125,15 +125,15 @@ socks = ["socksio (>=1.0.0,<2.0.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.24.1"
+version = "0.25.0"
 description = "The next generation HTTP client."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
 certifi = "*"
-httpcore = ">=0.15.0,<0.18.0"
+httpcore = ">=0.18.0,<0.19.0"
 idna = "*"
 sniffio = "*"
 
@@ -334,7 +334,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "ruff"
-version = "0.0.287"
+version = "0.0.289"
 description = "An extremely fast Python linter, written in Rust."
 category = "dev"
 optional = false
@@ -408,7 +408,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "bb3bb85f8d74f724e33827ed7cb646ba73b410efb22a93bdbfd2d69252c7049c"
+content-hash = "aab319efa9910759668699b26d01466766ba106ac3f4352aae4cd4af678b40e1"
 
 [metadata.files]
 annotated-types = []
